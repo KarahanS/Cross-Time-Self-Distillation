@@ -12,6 +12,7 @@
 #SBATCH --time=48:00:00
 #SBATCH --output=slurm_outputs/train_ibot_vidor/ibot_%A.out
 #SBATCH --error=slurm_outputs/train_ibot_vidor/ibot_%A.err
+
 ###############################################################################
 # 1. Environment
 ###############################################################################

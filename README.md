@@ -17,7 +17,7 @@ pip install -r requirements.txt
 1. `data/`: Scripts to build subsets of the VidOR and WT Venice datasets as described in the paper. Uses [FFmpeg](https://ffmpeg.org/) to extract frames at fixed intervals.
 2. `training/`: Data loaders and training loops for iBOT/ODIS with the cross-time loss, supporting both VidOR and WT Venice.
 3. `jobs/`: SLURM scripts for training and evaluation, plus `.bat` files for running training locally on Windows (e.g., for debugging).
-4. `.`: Top-level evaluation and utility scripts, shared helpers, `run.sh` (for LUMI cluster) and `requirements.txt`.
+4. `.`: Top-level evaluation and utility scripts, shared helpers, `run.sh` (for cluster) and `requirements.txt`.
 
 ---
 

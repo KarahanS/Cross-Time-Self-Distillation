@@ -19,7 +19,6 @@ CONFIGS=(
   "obj-0 true"
 )
 
-
 NUM_CONFIGS=${#CONFIGS[@]}
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -28,30 +27,8 @@ NUM_CONFIGS=${#CONFIGS[@]}
 
 n_tok=1
 CKPTS=(
-
-"/scratch/work/saritak1/checkpoints/coco_odis_adasim_thing_scale15/checkpoint.pth"
-#"/scratch/work/saritak1/checkpoints/odis_stuff_obj-20_fp16_scale-25/checkpoint.pth"
- # "/scratch/work/saritak1/checkpoints/odis+cribo_fp16_Lo_Lp_Lnn_Lc/checkpoint.pth"
- #"/scratch/work/saritak1/checkpoints/odis+cribo_fp16_Lo_Lp_Lnn/checkpoint.pth"
-#"/scratch/work/saritak1/checkpoints/venice_dino_Li_1sec_bs32_FULL/checkpoint0100.pth"
-#"/scratch/work/saritak1/checkpoints/venice_dino_Li_Lp_1sec_bs32_FULL/checkpoint0100.pth"
-#"/scratch/work/saritak1/checkpoints/venice_dino_Li_Lp_Lit_1sec_bs32_FULL/checkpoint0087.pth"
-
-#/scratch/work/saritak1/checkpoints/vidor_odis_Lp_Lo_Lot_1sec_instance_bs32/checkpoint0250.pth
-#/scratch/work/saritak1/checkpoints/vidor_odis_Lp_Lo_Lot_3sec_instance_bs32/checkpoint0250.pth
-
-
-#"/scratch/work/saritak1/checkpoints/ibot_Li_Lp/checkpoint.pth"
-#"/scratch/work/saritak1/checkpoints/ibot-coco-300e/checkpoint.pth"
-#"/scratch/work/saritak1/checkpoints/ibot_cribo_Li_Lp_Lnn_Lc/checkpoint.pth"
-#"/scratch/work/saritak1/checkpoints/vidor_odis_Lp_Lo_Lot_5sec_bs32_withsharedMIMMask/checkpoint0250.pth"
-#"/scratch/work/saritak1/checkpoints/vidor_odis_Lp_Lo_Lot_10sec_bs32_withsharedMIMMask/checkpoint0250.pth"
-#"/scratch/work/saritak1/checkpoints/vidor_odis_Lp_Lo_Lot_15sec_bs32_withsharedMIMMask/checkpoint0250.pth"
-#"/scratch/work/saritak1/checkpoints/vidor_odis_Lp_Lo_Lot_20sec_bs32_withsharedMIMMask/checkpoint0250.pth"
-#"/scratch/work/saritak1/checkpoints/vidor_odis_Lp_Lo_Lot_25sec_bs32_withsharedMIMMask/checkpoint0250.pth"
-
+  "<location-to-your-checkpoint>"
 )
-
 
 NUM_CKPTS=${#CKPTS[@]}
 
@@ -61,7 +38,6 @@ if (( NUM_CKPTS == 0 )); then
 fi
 
 TOTAL_TASKS=$(( NUM_CKPTS * NUM_CONFIGS ))
-
 
 if (( SLURM_ARRAY_TASK_ID >= TOTAL_TASKS )); then
   echo "SLURM_ARRAY_TASK_ID ${SLURM_ARRAY_TASK_ID} exceeds total tasks ${TOTAL_TASKS}." >&2
@@ -86,7 +62,7 @@ echo "────────────────────────�
 # ─────────────────────────────────────────────────────────────────────────f───
 module load mamba
 eval "$(conda shell.bash hook)"
-conda activate "/scratch/work/saritak1/conda/miniconda3/envs/odis"
+conda activate "<path-to-your-conda-env>"
 
 # ────────────────────────────────────────────────────────────────────────────
 # 5. OPTIONAL: Stage ImageNet once per node (kept here unchanged)
@@ -99,7 +75,7 @@ if [[ ! -f /tmp/imagenet/completed ]]; then
   else
     echo "Unpacking ImageNet to /tmp/imagenet ..."
     touch /tmp/imagenet/writing
-    tar -C /tmp/imagenet -xf /scratch/shareddata/dldata/imagenet_imagefolder/ILSVRC2012_imagefolder.tar
+    tar -C /tmp/imagenet -xf "<path-to-ILSVRC2012_imagefolder.tar>"
     rm  /tmp/imagenet/writing
     touch /tmp/imagenet/completed
   fi
@@ -108,7 +84,7 @@ fi
 # ────────────────────────────────────────────────────────────────────────────
 # 6. RUN
 # ────────────────────────────────────────────────────────────────────────────
-CODE_DIR=/home/saritak1/Object-Level-Self-Supervised-Learning
+CODE_DIR="<path-to-your-repo-root>"
 PORT=$(( 29500 + SLURM_ARRAY_TASK_ID ))
 
 echo "Torchrun port   : $PORT"
@@ -121,6 +97,6 @@ torchrun --nproc_per_node=1 --rdzv_endpoint=localhost:$PORT \
     --boxes_root          "${CODE_DIR}/boxes"               \
     --knn_token           "$knn_token_i"                    \
     --use_bounding_boxes  "$use_boxes_i"                    \
-    --arch                "vit_small"                        \
-    --num_object_tokens "$n_tok"                            \
+    --arch                "vit_small"                       \
+    --num_object_tokens   "$n_tok"                          \
     --num_workers         8

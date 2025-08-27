@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=ibot_vidor_img
-#SBATCH --account=project_462000938
+#SBATCH --account=<your_project_id_here>
 #SBATCH --partition=standard-g
 #SBATCH --nodes=2
 #SBATCH --gpus-per-node=8
@@ -12,6 +12,7 @@
 #SBATCH --time=48:00:00
 #SBATCH --output=slurm_outputs/train_ibot_venice/ibot_%A.out
 #SBATCH --error=slurm_outputs/train_ibot_venice/ibot_%A.err
+
 ###############################################################################
 # 1. Environment
 ###############################################################################
@@ -20,7 +21,7 @@ export WANDB_API_KEY=$(< "${HOME}/.wandb_key")
 
 # 2. Stage the VidOR dataset into fast /tmp on **every** node
 ###############################################################################
-VENICE_ZIP=/scratch/project_462000938/wt_venice/venice_1sec.zip
+VENICE_ZIP=/scratch/<project_id>/wt_venice/venice_1sec.zip
 TMP_VENICE=/tmp/venice                    # will contain  images/   annotations/
 
 srun --ntasks-per-node=1 --nodes=${SLURM_JOB_NUM_NODES} mkdir -p "${TMP_VENICE}"
@@ -34,9 +35,9 @@ TIME_MATCHING=tg2sg_one2one
 NAME=Lo_Lp_venice_1sec_FULL
 # 3. Run iBOT inside the same container stack you used for HIT
 ###############################################################################
-CKPT_DIR=/scratch/project_462000938/checkpoints/${NAME}
-CONTAINER=/scratch/project_462000938/containers/hit_lumi.sif  
-CODE_DIR=/users/karasari/Object-Level-Self-Supervised-Learning
+CKPT_DIR=/scratch/<project_id>/checkpoints/${NAME}
+CONTAINER=/scratch/<project_id>/containers/<container>.sif
+CODE_DIR=/users/<username>/<repo_name>
 
 mkdir -p "${CKPT_DIR}"
 
@@ -86,11 +87,10 @@ srun --cpu-bind=mask_cpu=${CPU_MASKS} \
             --time_matching $TIME_MATCHING \
             --wandb true \
             --wandb_project vidor \
-            --wandb_entity agape \
+            --wandb_entity <wandb_entity> \
             --wandb_run_name ${NAME} \
             --neighbor_mim_mask false \
             --static_crop false \
             --resize_first true \
             --resize_short_side 640 \
-            --num_object_tokens 1 \
-
+            --num_object_tokens 1

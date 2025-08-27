@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=ibot_vidor_img
-#SBATCH --account=project_462000938
+#SBATCH --account=<your_project_id_here>
 #SBATCH --partition=standard-g
 #SBATCH --nodes=2
 #SBATCH --gpus-per-node=8
@@ -13,6 +13,7 @@
 #SBATCH --output=slurm_outputs/vidor/ibot_%A.out
 #SBATCH --error=slurm_outputs/vidor/ibot_%A.err
 #SBATCH --array=0
+
 ###############################################################################
 # 1. Environment
 ###############################################################################
@@ -21,7 +22,7 @@ export WANDB_API_KEY=$(< "${HOME}/.wandb_key")
 
 # 2. Stage the VidOR dataset into fast /tmp on **every** node
 ###############################################################################
-VIDOR_ZIP=/scratch/project_462000938/odis/vidor_60Kclips_5s.zip
+VIDOR_ZIP=/scratch/<project_id>/odis/vidor_60Kclips_5s.zip
 TMP_VIDOR=/tmp/vidor                    # will contain  images/   annotations/
 
 LAMBDA1=(0.0 0.0 0.0 0.0 1.0)  # [IMG] level loss
@@ -61,9 +62,9 @@ OBJ_TIME_MATCHING=tg2sg_all2all
 
 # 3. Run iBOT inside the same container stack you used for HIT
 ###############################################################################
-CKPT_DIR=/scratch/project_462000938/checkpoints
-CONTAINER=/scratch/project_462000938/containers/hit_lumi.sif  
-CODE_DIR=/users/karasari/Object-Level-Self-Supervised-Learning
+CKPT_DIR=/scratch/<project_id>/checkpoints
+CONTAINER=/scratch/<project_id>/containers/<container>.sif
+CODE_DIR=/users/<username>/<repo_name>
 
 mkdir -p "${CKPT_DIR}"
 
@@ -120,5 +121,5 @@ srun --cpu-bind=mask_cpu=${CPU_MASKS} \
             --obj_time_matching $OBJ_TIME_MATCHING \
             --wandb true \
             --wandb_project vidor \
-            --wandb_entity agape \
-            --wandb_run_name $NAME \
+            --wandb_entity <wandb_entity> \
+            --wandb_run_name $NAME

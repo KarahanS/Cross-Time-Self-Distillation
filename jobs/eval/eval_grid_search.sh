@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=project_462000938
+#SBATCH --account=<your_project_id_here>
 #SBATCH --partition=standard-g
 #SBATCH --nodes=1
 #SBATCH --gpus-per-node=8
@@ -16,9 +16,7 @@
 # 1.  CHECKPOINT LIST (add or wildcard as needed)
 # ──────────────────────────────────────────────────────────────────────────
 CKPTS=(
- # "/scratch/project_462000938/checkpoints/venice_dino_Li_1sec_bs32_FULL/checkpoint0100.pth"
- # "/scratch/project_462000938/checkpoints/venice_dino_Li_Lp_1sec_bs32_FULL/checkpoint0100.pth"
-  "/scratch/project_462000938/checkpoints/venice_dino_Li_Lp_Lit_1sec_bs32_FULL/checkpoint0087.pth"
+ "<location-to-your-checkpoint>"
 )
 NUM_CKPTS=${#CKPTS[@]}
 
@@ -66,14 +64,14 @@ then
   else
     echo "Writing ImageNet to /tmp/imagenet"
     touch /tmp/imagenet/writing
-    tar --directory=/tmp/imagenet -x -f /scratch/project_462000938/odis/ILSVRC2012_imagefolder.tar
+    tar --directory=/tmp/imagenet -x -f /scratch/<project_id>/path/to/ILSVRC2012_imagefolder.tar
     rm /tmp/imagenet/writing
     touch /tmp/imagenet/completed
   fi
 fi
 
 # ──────────────────────────────────────────────────────────────────────────
-# 5.  Launch evaluation inside the LUMI container
+# 5.  Launch evaluation inside the container
 # ──────────────────────────────────────────────────────────────────────────
 CPU_MASKS=0x00fe000000000000,0xfe00000000000000,0x0000000000fe0000,\
 0x00000000fe000000,0x00000000000000fe,0x000000000000fe00,\
@@ -86,18 +84,18 @@ srun --cpu-bind=mask_cpu=$CPU_MASKS \
     -B /var/spool/slurmd \
     -B /opt/cray \
     -B /usr/lib64/libcxi.so.1 \
-    -B /scratch/project_462000938/linear_probe \
-    -B /scratch/project_462000938 \
+    -B /scratch/<project_id>/linear_probe \
+    -B /scratch/<project_id> \
     -B .:/workdir \
     -B /tmp \
-    /scratch/project_462000938/containers/hit_lumi.sif \
-    /users/karasari/Object-Level-Self-Supervised-Learning/run.sh \
-      python -u /users/karasari/Object-Level-Self-Supervised-Learning/eval_linear_grid_search.py \
+    /scratch/<project_id>/containers/<your_container>.sif \
+    /users/<username>/<repo_name>/run.sh \
+      python -u /users/<username>/<repo_name>/eval_linear_grid_search.py \
         --arch vit_small \
-        --output_dir /scratch/project_462000938/linear_probe \
+        --output_dir /scratch/<project_id>/linear_probe \
         --pretrained_weights "$CKPT_PATH" \
         --data_path /tmp/imagenet \
-        --boxes_root /users/karasari/Object-Level-Self-Supervised-Learning/boxes \
+        --boxes_root /users/<username>/<repo_name>/boxes \
         --num_workers 7 \
         --obj_pool "$TOKEN" \
         --num_object_tokens $NUM_OBJ_TOK
